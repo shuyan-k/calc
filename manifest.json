@@ -1,0 +1,22 @@
+{
+  "name": "计算器",
+  "short_name": "计算器",
+  "description": "科学计算 · 函数绘图 · 进制转换",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F7F9",
+  "theme_color": "#F7F7F9",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
