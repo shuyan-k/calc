@@ -1,10 +1,11 @@
-const CACHE_NAME = 'calc-v1';
+const CACHE_NAME = 'calc-v7';
 const ASSETS = [
   './',
   './index.html',
+  './app.js',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  './icon.svg',
+  './icon-180.png'
 ];
 
 self.addEventListener('install', event => {

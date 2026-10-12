@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icon-192.png">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
@@ -9,14 +7,33 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="计算器">
 <meta name="theme-color" content="#F7F7F9">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
+<link rel="apple-touch-icon" href="./icon-180.png">
 <title>计算器</title>
 <style>
+  :root {
+    --c-bg: #F7F7F9;
+    --c-card: #FFFFFF;
+    --c-text: #111111;
+    --c-text-sub: #8E8E93;
+    --c-border: #EFEFF2;
+    --c-accent: #007AFF;
+    --c-num: #111111;
+    --c-op: #007AFF;
+    --c-func: #FF9500;
+    --c-var: #34C759;
+    --c-userfn: #AF52DE;
+    --radius-lg: 20px;
+    --radius-md: 16px;
+    --shadow-card: 0 6px 16px rgba(0,0,0,0.05);
+    --shadow-btn: 0 4px 10px rgba(0,0,0,0.05);
+  }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--c-bg); }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
-    background: #F7F7F9;
-    color: #111;
+    color: var(--c-text);
     -webkit-font-smoothing: antialiased;
     user-select: none;
     -webkit-user-select: none;
@@ -26,214 +43,244 @@
     flex-direction: column;
     height: 100vh;
     height: 100dvh;
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
     padding-top: env(safe-area-inset-top);
+    background: var(--c-bg);
   }
   .screen {
     flex: 1;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     display: none;
-    padding: 12px 14px 16px;
+    padding: 12px 16px 16px;
+    flex-direction: column;
+    width: 100%;
   }
-  .screen.active { display: block; }
-
-  /* ---------- 卡片 ---------- */
+  .screen.active { display: flex; }
+  #screen-sci .display { margin-top: auto; }
+  #screen-sci .pad { margin-bottom: auto; }
   .card {
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+    background: var(--c-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
     padding: 14px 16px;
     margin-bottom: 12px;
+    width: 100%;
+  }
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--c-text-sub);
+    letter-spacing: 0.6px;
+    margin: 0 0 10px 2px;
+    text-transform: uppercase;
   }
 
-  /* ---------- 显示区 ---------- */
+  /* 显示区 */
   .display { padding: 10px 16px 14px; }
-  .display-head {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 4px;
-  }
+  .display-head { display: flex; justify-content: flex-end; margin-bottom: 4px; }
   .angle-toggle {
-    background: #F2F2F7;
-    border: none;
-    color: #007AFF;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 10px;
-    letter-spacing: 0.5px;
-    font-family: inherit;
+    background: #F2F2F7; border: none; color: var(--c-accent);
+    font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 10px;
+    letter-spacing: 0.5px; font-family: inherit;
   }
   .expr {
-    font-size: 32px;
-    font-weight: 300;
-    text-align: right;
-    word-break: break-all;
-    line-height: 1.15;
-    min-height: 38px;
-    color: #111;
-    font-variant-numeric: tabular-nums;
-  }
-  .result {
-    font-size: 17px;
-    color: #8E8E93;
-    text-align: right;
-    min-height: 22px;
-    margin-top: 2px;
-    font-variant-numeric: tabular-nums;
+    font-size: 32px; font-weight: 300; text-align: center;
+    word-break: break-all; overflow-wrap: anywhere; line-height: 1.15; min-height: 38px;
+    color: var(--c-text); font-variant-numeric: tabular-nums;
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    word-break: break-all;
+  }
+  .hl-num { color: var(--c-num); }
+  .hl-op { color: var(--c-op); font-weight: 500; }
+  .hl-func { color: var(--c-func); font-weight: 500; }
+  .hl-var { color: var(--c-var); font-weight: 600; }
+  .hl-userfn { color: var(--c-userfn); font-weight: 600; }
+  .result {
+    font-size: 17px; color: var(--c-text-sub); text-align: center;
+    min-height: 22px; margin-top: 2px; font-variant-numeric: tabular-nums;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; word-break: break-all;
   }
   .result.error { color: #FF3B30; }
+  .precision-hint {
+    color: var(--c-text-sub); font-size: 10px; text-align: center; margin-top: 5px;
+  }
 
-  /* ---------- 键盘 ---------- */
+  /* 键盘 */
   .pad {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    display: grid; grid-template-columns: minmax(0, 1fr);
+    gap: 12px; width: 100%;
+  }
+  .science-pad {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: minmax(48px, 1fr); gap: 8px;
+  }
+  .number-pad {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: minmax(48px, 1fr); gap: 8px;
   }
   .key {
-    background: #fff;
-    border: none;
-    border-radius: 16px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    font-family: inherit;
-    font-size: 20px;
-    font-weight: 500;
-    color: #111;
-    min-height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.08s, background 0.08s;
-    font-variant-numeric: tabular-nums;
+    background: var(--c-card); border: 1px solid rgba(17,17,17,0.025);
+    border-radius: 15px; box-shadow: 0 3px 9px rgba(0,0,0,0.045);
+    font-family: inherit; font-size: 20px;
+    font-weight: 500; color: var(--c-text); min-height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: transform 0.08s, background 0.08s;
+    font-variant-numeric: tabular-nums; padding: 0;
   }
   .key:active { transform: scale(0.95); background: #F2F2F7; }
-  .key.fn { color: #007AFF; font-size: 16px; }
-  .key.op { color: #007AFF; font-size: 22px; }
-  .key.warn { color: #FF3B30; }
-  .key.eq { background: #007AFF; color: #fff; font-weight: 600; }
+  .key.num { color: var(--c-num); }
+  .key.op { color: var(--c-op); background: #EAF3FF; font-size: 22px; font-weight: 600; }
+  .key.func { color: #D97706; background: #FFF5E8; font-size: 16px; font-weight: 600; }
+  .key.var { color: #1C9B45; background: #EAF8EE; font-size: 18px; }
+  .key.warn { color: #E53935; background: #FFF0EF; font-size: 18px; }
+  .key.eq {
+    background: linear-gradient(135deg, #1687FF, #0066D6);
+    color: #fff; font-weight: 700; box-shadow: 0 5px 12px rgba(0,122,255,0.22);
+  }
   .key.eq:active { background: #0062CC; }
   .key.span2 { grid-column: span 2; }
+  .key.span4 { grid-column: span 4; }
+  .key sup { font-size: 0.68em; line-height: 0; }
+  .science-pad .key {
+    min-height: 0; background: var(--c-card); border-color: rgba(17,17,17,0.025);
+  }
 
-  /* ---------- 绘图 ---------- */
+  /* 函数定义行 */
+  .fn-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #F2F2F7;
+  }
+  .fn-row:last-child { border-bottom: none; }
+  .fn-name {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--c-userfn);
+    min-width: 42px;
+  }
+  .fn-eq {
+    color: var(--c-text-sub);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 16px;
+  }
+  .fn-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 16px;
+    color: var(--c-text);
+    padding: 4px 0;
+    min-width: 0;
+  }
+  .btn-del {
+    background: none; border: none; color: #C7C7CC;
+    font-size: 18px; padding: 0 4px; cursor: pointer; flex-shrink: 0;
+  }
+  .btn-add {
+    background: #F2F2F7; border: none; color: var(--c-accent);
+    font-size: 14px; font-weight: 600; padding: 8px 12px; border-radius: 12px;
+    width: 100%; margin-top: 8px; font-family: inherit; cursor: pointer;
+  }
+  .btn-add:active { background: #E5E5EA; }
+  .fn-hint {
+    font-size: 11px;
+    color: #C7C7CC;
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .fn-hint code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--c-text-sub);
+    background: #F2F2F7;
+    padding: 1px 4px;
+    border-radius: 4px;
+  }
+
+  /* 绘图 */
   .graph-input-row {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding: 6px 0;
   }
-  .graph-input-row .label {
-    font-size: 20px;
-    font-weight: 500;
-    color: #8E8E93;
+  .color-dot {
+    width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+  }
+  .graph-label {
+    font-size: 16px; font-weight: 600; color: var(--c-text-sub);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; flex-shrink: 0;
+  }
+  .graph-input {
+    flex: 1; border: none; outline: none; background: transparent;
+    font-size: 16px; font-weight: 500; color: var(--c-text);
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    padding: 4px 0; min-width: 0;
   }
-  #graphExpr {
-    flex: 1;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-size: 20px;
-    font-weight: 500;
-    color: #111;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    padding: 4px 0;
-    min-width: 0;
+  .graph-input-error {
+    color: #FF3B30; font-size: 12px; min-height: 0; line-height: 1.4;
   }
+  .graph-input-error:not(:empty) { padding: 0 0 6px 20px; }
   .graph-card { padding: 8px; }
   #graphCanvas {
-    display: block;
-    width: 100%;
-    height: 380px;
-    border-radius: 14px;
-    touch-action: none;
+    display: block; width: 100%; height: 380px;
+    border-radius: 14px; touch-action: none;
   }
-  .graph-actions {
-    display: flex;
-    gap: 8px;
-  }
+  .graph-actions { display: flex; gap: 8px; }
   .graph-actions button {
-    flex: 1;
-    background: #fff;
-    border: none;
-    border-radius: 14px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    font-family: inherit;
-    font-size: 16px;
-    font-weight: 500;
-    color: #007AFF;
-    min-height: 46px;
-    cursor: pointer;
+    flex: 1; background: var(--c-card); border: none; border-radius: 14px;
+    box-shadow: var(--shadow-btn); font-family: inherit; font-size: 15px;
+    font-weight: 500; color: var(--c-accent); min-height: 46px; cursor: pointer;
   }
   .graph-actions button:active { background: #F2F2F7; }
 
-  /* ---------- 进制 ---------- */
+  /* 进制 */
   .base-row {
-    display: flex;
-    align-items: center;
-    padding: 12px 0;
+    display: flex; align-items: center; padding: 12px 0;
     border-bottom: 1px solid #F2F2F7;
   }
   .base-row:last-child { border-bottom: none; }
   .base-label {
-    width: 52px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #8E8E93;
-    letter-spacing: 0.5px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    width: 52px; font-size: 13px; font-weight: 700; color: var(--c-text-sub);
+    letter-spacing: 0.5px; font-family: ui-monospace, "SF Mono", Menlo, monospace;
   }
   .base-input {
-    flex: 1;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-size: 22px;
-    font-weight: 500;
-    color: #111;
+    flex: 1; border: none; outline: none; background: transparent;
+    font-size: 22px; font-weight: 500; color: var(--c-text);
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    text-align: right;
-    word-break: break-all;
-    min-width: 0;
+    text-align: center; line-height: 1.25; word-break: break-all;
+    overflow-wrap: anywhere; white-space: pre-wrap; resize: none;
+    overflow: hidden; min-width: 0; min-height: 28px; height: 28px; padding: 0;
   }
-  .base-hint {
-    font-size: 12px;
-    color: #C7C7CC;
-    text-align: center;
-    padding: 8px 0 0;
-  }
+  .base-hint { font-size: 12px; color: #C7C7CC; text-align: center; padding: 8px 0 0; }
+  .base-hint.error { color: #FF3B30; }
 
-  /* ---------- Tab Bar ---------- */
+  /* Tab Bar */
   .tabbar {
-    display: flex;
-    background: #fff;
-    border-top: 1px solid #EFEFF2;
-    padding-bottom: env(safe-area-inset-bottom);
+    display: flex; background: var(--c-card); border-top: 1px solid var(--c-border);
+    padding-bottom: env(safe-area-inset-bottom); width: 100%; max-width: 500px;
+    margin: 0 auto;
   }
   .tabbar button {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: 8px 0 6px;
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: 500;
-    color: #8E8E93;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    cursor: pointer;
+    flex: 1; background: none; border: none; padding: 8px 0 6px;
+    font-family: inherit; font-size: 11px; font-weight: 500;
+    color: var(--c-text-sub); display: flex; flex-direction: column;
+    align-items: center; gap: 3px; cursor: pointer;
   }
-  .tabbar button.active { color: #007AFF; }
+  .tabbar button.active { color: var(--c-accent); }
   .tabbar .ico { font-size: 19px; line-height: 1; }
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- ================= 科学计算 ================= -->
+  <!-- ===== 科学计算 ===== -->
   <section class="screen active" id="screen-sci">
     <div class="display card">
       <div class="display-head">
@@ -241,58 +288,65 @@
       </div>
       <div class="expr" id="expr">0</div>
       <div class="result" id="result"></div>
+      <div class="precision-hint">整数四则运算精确；小数和函数结果为近似值</div>
     </div>
     <div class="pad">
-      <button class="key fn" data-ins="sin(">sin</button>
-      <button class="key fn" data-ins="cos(">cos</button>
-      <button class="key fn" data-ins="tan(">tan</button>
-      <button class="key op" data-ins="^">xʸ</button>
-
-      <button class="key fn" data-ins="ln(">ln</button>
-      <button class="key fn" data-ins="log(">log</button>
-      <button class="key fn" data-ins="sqrt(">√</button>
-      <button class="key op" data-ins="%">%</button>
-
-      <button class="key fn" data-ins="e">e</button>
-      <button class="key fn" data-ins="pi">π</button>
-      <button class="key fn" data-ins="(">(</button>
-      <button class="key fn" data-ins=")">)</button>
-
-      <button class="key warn" data-action="clear">C</button>
-      <button class="key fn" data-action="back">⌫</button>
-      <button class="key fn" data-ins="x">x</button>
-      <button class="key op" data-ins="/">÷</button>
-
-      <button class="key" data-ins="7">7</button>
-      <button class="key" data-ins="8">8</button>
-      <button class="key" data-ins="9">9</button>
-      <button class="key op" data-ins="*">×</button>
-
-      <button class="key" data-ins="4">4</button>
-      <button class="key" data-ins="5">5</button>
-      <button class="key" data-ins="6">6</button>
-      <button class="key op" data-ins="-">−</button>
-
-      <button class="key" data-ins="1">1</button>
-      <button class="key" data-ins="2">2</button>
-      <button class="key" data-ins="3">3</button>
-      <button class="key op" data-ins="+">+</button>
-
-      <button class="key span2" data-ins="0">0</button>
-      <button class="key" data-ins=".">.</button>
-      <button class="key eq" data-action="equals">=</button>
+      <div class="science-pad">
+        <button class="key func" data-ins="sin(">sin</button>
+        <button class="key func" data-ins="cos(">cos</button>
+        <button class="key func" data-ins="tan(">tan</button>
+        <button class="key op" data-ins="^" aria-label="x 的 y 次方">x<sup>y</sup></button>
+        <button class="key func" data-ins="ln(">ln</button>
+        <button class="key func" data-ins="log(">log</button>
+        <button class="key func" data-ins="sqrt(">√</button>
+        <button class="key func" data-ins="^(1/" aria-label="y 次根"><sup>y</sup>√x</button>
+        <button class="key func" data-ins="1/(" aria-label="倒数 1 除以 x">x<sup>−1</sup></button>
+        <button class="key op" data-ins="%" aria-label="取余">mod</button>
+        <button class="key func" data-ins="e">e</button>
+        <button class="key func" data-ins="pi">π</button>
+        <button class="key op" data-ins="(">(</button>
+        <button class="key op" data-ins=")">)</button>
+        <button class="key warn" data-action="clear">C</button>
+        <button class="key func" data-action="back">⌫</button>
+      </div>
+      <div class="number-pad">
+        <button class="key num" data-ins="7">7</button>
+        <button class="key num" data-ins="8">8</button>
+        <button class="key num" data-ins="9">9</button>
+        <button class="key op" data-ins="+">+</button>
+        <button class="key num" data-ins="4">4</button>
+        <button class="key num" data-ins="5">5</button>
+        <button class="key num" data-ins="6">6</button>
+        <button class="key op" data-ins="-">−</button>
+        <button class="key num" data-ins="1">1</button>
+        <button class="key num" data-ins="2">2</button>
+        <button class="key num" data-ins="3">3</button>
+        <button class="key op" data-ins="*">×</button>
+        <button class="key num span2" data-ins="0">0</button>
+        <button class="key num" data-ins=".">.</button>
+        <button class="key op" data-ins="/">÷</button>
+        <button class="key eq span4" data-action="equals">=</button>
+      </div>
     </div>
   </section>
 
-  <!-- ================= 函数绘图 ================= -->
+  <!-- ===== 函数绘图 ===== -->
   <section class="screen" id="screen-graph">
     <div class="card">
-      <div class="graph-input-row">
-        <span class="label">y =</span>
-        <input id="graphExpr" type="text" value="sin(x)" spellcheck="false"
-               autocapitalize="off" autocorrect="off" autocomplete="off">
+      <div class="section-title">函数定义</div>
+      <div id="fnList"></div>
+      <button class="btn-add" id="addFn">+ 添加函数</button>
+      <div class="fn-hint">
+        可用 <code>d(f, x)</code> 求 f 在 x 处的导数，<code>i(f, a, b)</code> 求定积分。
       </div>
     </div>
+
+    <div class="card">
+      <div class="section-title">绘图曲线</div>
+      <div id="graphList"></div>
+      <button class="btn-add" id="addGraphFn">+ 添加曲线</button>
+    </div>
+
     <div class="card graph-card">
       <canvas id="graphCanvas"></canvas>
     </div>
@@ -303,34 +357,33 @@
     </div>
   </section>
 
-  <!-- ================= 进制转换 ================= -->
+  <!-- ===== 进制转换 ===== -->
   <section class="screen" id="screen-base">
     <div class="card">
       <div class="base-row">
         <span class="base-label">DEC</span>
-        <input class="base-input" id="in-dec" inputmode="numeric" spellcheck="false"
-               autocapitalize="off" autocorrect="off" autocomplete="off" value="255">
+        <textarea class="base-input" id="in-dec" inputmode="numeric" spellcheck="false"
+                  autocapitalize="off" autocorrect="off" autocomplete="off" rows="1">255</textarea>
       </div>
       <div class="base-row">
         <span class="base-label">HEX</span>
-        <input class="base-input" id="in-hex" spellcheck="false"
-               autocapitalize="characters" autocorrect="off" autocomplete="off" value="FF">
+        <textarea class="base-input" id="in-hex" spellcheck="false"
+                  autocapitalize="characters" autocorrect="off" autocomplete="off" rows="1">FF</textarea>
       </div>
       <div class="base-row">
         <span class="base-label">OCT</span>
-        <input class="base-input" id="in-oct" inputmode="numeric" spellcheck="false"
-               autocapitalize="off" autocorrect="off" autocomplete="off" value="377">
+        <textarea class="base-input" id="in-oct" inputmode="numeric" spellcheck="false"
+                  autocapitalize="off" autocorrect="off" autocomplete="off" rows="1">377</textarea>
       </div>
       <div class="base-row">
         <span class="base-label">BIN</span>
-        <input class="base-input" id="in-bin" inputmode="numeric" spellcheck="false"
-               autocapitalize="off" autocorrect="off" autocomplete="off" value="11111111">
+        <textarea class="base-input" id="in-bin" inputmode="numeric" spellcheck="false"
+                  autocapitalize="off" autocorrect="off" autocomplete="off" rows="1">11111111</textarea>
       </div>
     </div>
-    <div class="base-hint">在任意一栏输入，其余自动同步</div>
+    <div class="base-hint">输入上限 64 位；转换结果可更长，空格用于分组</div>
   </section>
 
-  <!-- ================= Tab Bar ================= -->
   <nav class="tabbar">
     <button data-tab="sci" class="active"><span class="ico">∑</span>科学</button>
     <button data-tab="graph"><span class="ico">📈</span>绘图</button>
@@ -338,658 +391,6 @@
   </nav>
 </div>
 
-<script>
-/* =========================================================
-   1. 表达式求值引擎（Tokenizer + Shunting-yard + RPN）
-   ========================================================= */
-
-const FUNC_NAMES = new Set([
-  'sin','cos','tan','asin','acos','atan',
-  'sinh','cosh','tanh',
-  'ln','log','log10','log2',
-  'sqrt','cbrt','abs','exp',
-  'floor','ceil','round','sign','deg','rad'
-]);
-
-const CONSTANTS = {
-  'pi': Math.PI, 'π': Math.PI,
-  'e': Math.E,
-  'tau': 2 * Math.PI, 'τ': 2 * Math.PI,
-  'phi': (1 + Math.sqrt(5)) / 2, 'φ': (1 + Math.sqrt(5)) / 2
-};
-
-const isDigitCh = c => /[0-9]/.test(c);
-const isLetterCh = c => /[\p{L}_]/u.test(c);
-
-function tokenize(input) {
-  const tokens = [];
-  let i = 0;
-  const n = input.length;
-
-  while (i < n) {
-    const c = input[i];
-
-    if (/\s/.test(c)) { i++; continue; }
-
-    // 数字（含科学计数法 1e-5）
-    if (isDigitCh(c) || c === '.') {
-      let numStr = '';
-      while (i < n && (isDigitCh(input[i]) || input[i] === '.')) {
-        numStr += input[i++];
-      }
-      if (i < n && (input[i] === 'e' || input[i] === 'E')) {
-        let j = i + 1;
-        let sign = '';
-        if (j < n && (input[j] === '+' || input[j] === '-')) sign = input[j++];
-        if (j < n && isDigitCh(input[j])) {
-          numStr += 'e' + sign;
-          i = j;
-          while (i < n && isDigitCh(input[i])) numStr += input[i++];
-        }
-      }
-      if (numStr.endsWith('.')) numStr = numStr.slice(0, -1);
-      const val = parseFloat(numStr);
-      if (isNaN(val)) throw new Error('无效数字：' + numStr);
-      tokens.push({ type: 'number', value: val });
-      continue;
-    }
-
-    // 标识符（含希腊字母）
-    if (isLetterCh(c)) {
-      let name = '';
-      while (i < n && (isLetterCh(input[i]) || isDigitCh(input[i]))) {
-        name += input[i++];
-      }
-      tokens.push({ type: 'identifier', name: name.toLowerCase() });
-      continue;
-    }
-
-    // 运算符 & 括号
-    switch (c) {
-      case '+': case '-': case '*': case '/': case '%': case '^':
-        tokens.push({ type: 'op', value: c }); i++; break;
-      case '×': tokens.push({ type: 'op', value: '*' }); i++; break;
-      case '÷': tokens.push({ type: 'op', value: '/' }); i++; break;
-      case '−': tokens.push({ type: 'op', value: '-' }); i++; break;
-      case '(': tokens.push({ type: 'leftParen' }); i++; break;
-      case ')': tokens.push({ type: 'rightParen' }); i++; break;
-      default: throw new Error('无效字符：' + c);
-    }
-  }
-  return tokens;
-}
-
-function needsImplicitMul(prev, cur) {
-  let prevOk = false;
-  if (prev.type === 'number' || prev.type === 'rightParen') prevOk = true;
-  else if (prev.type === 'identifier') {
-    if (!FUNC_NAMES.has(prev.name)) prevOk = true;
-  }
-  let curOk = (cur.type === 'number' || cur.type === 'leftParen' || cur.type === 'identifier');
-  return prevOk && curOk;
-}
-
-function insertImplicitMul(tokens) {
-  const out = [];
-  for (let i = 0; i < tokens.length; i++) {
-    if (i > 0 && needsImplicitMul(tokens[i - 1], tokens[i])) {
-      out.push({ type: 'op', value: '*' });
-    }
-    out.push(tokens[i]);
-  }
-  return out;
-}
-
-function precedence(op) {
-  switch (op) {
-    case '+': case '-': return 1;
-    case '*': case '/': case '%': return 2;
-    case '~': return 3;
-    case '^': return 4;
-    default: return 0;
-  }
-}
-const isRightAssoc = op => op === '^' || op === '~';
-
-function isUnaryPos(prev) {
-  if (!prev) return true;
-  return prev.type === 'op' || prev.type === 'leftParen';
-}
-
-function toRPN(tokens) {
-  tokens = insertImplicitMul(tokens);
-  const output = [];
-  const stack = [];
-  let prev = null;
-
-  for (const token of tokens) {
-    if (token.type === 'number') {
-      output.push(token);
-    } else if (token.type === 'identifier') {
-      if (CONSTANTS[token.name] !== undefined) {
-        output.push({ type: 'number', value: CONSTANTS[token.name] });
-      } else if (FUNC_NAMES.has(token.name)) {
-        stack.push(token);
-      } else if (token.name === 'x') {
-        output.push(token);
-      } else {
-        throw new Error('未知标识符：' + token.name);
-      }
-    } else if (token.type === 'leftParen') {
-      stack.push(token);
-    } else if (token.type === 'rightParen') {
-      let found = false;
-      while (stack.length) {
-        const top = stack[stack.length - 1];
-        if (top.type === 'leftParen') { stack.pop(); found = true; break; }
-        output.push(stack.pop());
-      }
-      if (!found) throw new Error('括号不匹配');
-      if (stack.length && stack[stack.length - 1].type === 'identifier') {
-        output.push(stack.pop());
-      }
-    } else if (token.type === 'op') {
-      const c = token.value;
-      if (c === '-' && isUnaryPos(prev)) {
-        stack.push({ type: 'op', value: '~' });
-      } else if (c === '+' && isUnaryPos(prev)) {
-        // 一元正号忽略
-      } else {
-        const p1 = precedence(c);
-        while (stack.length) {
-          const top = stack[stack.length - 1];
-          let topP = null;
-          if (top.type === 'op') topP = precedence(top.value);
-          else if (top.type === 'identifier') topP = 5;
-          if (topP === null) break;
-          if (topP < p1) break;
-          if (topP === p1 && isRightAssoc(c)) break;
-          output.push(stack.pop());
-        }
-        stack.push(token);
-      }
-    }
-    prev = token;
-  }
-  while (stack.length) {
-    const top = stack.pop();
-    if (top.type === 'leftParen') throw new Error('括号不匹配');
-    output.push(top);
-  }
-  return output;
-}
-
-function evaluateRPN(rpn, x, angleMode) {
-  const toRad = v => angleMode === 'deg' ? v * Math.PI / 180 : v;
-  const fromRad = v => angleMode === 'deg' ? v * 180 / Math.PI : v;
-
-  const fns = {
-    sin: v => Math.sin(toRad(v)),
-    cos: v => Math.cos(toRad(v)),
-    tan: v => Math.tan(toRad(v)),
-    asin: v => { if (v < -1 || v > 1) throw new Error('asin 定义域错误'); return fromRad(Math.asin(v)); },
-    acos: v => { if (v < -1 || v > 1) throw new Error('acos 定义域错误'); return fromRad(Math.acos(v)); },
-    atan: v => fromRad(Math.atan(v)),
-    sinh: Math.sinh, cosh: Math.cosh, tanh: Math.tanh,
-    ln: v => { if (v <= 0) throw new Error('ln 定义域错误'); return Math.log(v); },
-    log: v => { if (v <= 0) throw new Error('log 定义域错误'); return Math.log10(v); },
-    log10: v => { if (v <= 0) throw new Error('log 定义域错误'); return Math.log10(v); },
-    log2: v => { if (v <= 0) throw new Error('log2 定义域错误'); return Math.log2(v); },
-    sqrt: v => { if (v < 0) throw new Error('sqrt 定义域错误'); return Math.sqrt(v); },
-    cbrt: Math.cbrt, abs: Math.abs, exp: Math.exp,
-    floor: Math.floor, ceil: Math.ceil, round: Math.round,
-    sign: Math.sign,
-    deg: v => v * 180 / Math.PI,
-    rad: v => v * Math.PI / 180
-  };
-
-  const stack = [];
-  for (const token of rpn) {
-    if (token.type === 'number') {
-      stack.push(token.value);
-    } else if (token.type === 'identifier') {
-      if (token.name === 'x') {
-        if (x === undefined) throw new Error('未定义变量 x');
-        stack.push(x);
-      } else if (fns[token.name]) {
-        const a = stack.pop();
-        if (a === undefined) throw new Error('表达式不完整');
-        stack.push(fns[token.name](a));
-      } else {
-        throw new Error('未知标识符：' + token.name);
-      }
-    } else if (token.type === 'op') {
-      const c = token.value;
-      if (c === '~') {
-        const a = stack.pop();
-        if (a === undefined) throw new Error('表达式不完整');
-        stack.push(-a);
-      } else {
-        const b = stack.pop();
-        const a = stack.pop();
-        if (a === undefined || b === undefined) throw new Error('表达式不完整');
-        switch (c) {
-          case '+': stack.push(a + b); break;
-          case '-': stack.push(a - b); break;
-          case '*': stack.push(a * b); break;
-          case '/': if (b === 0) throw new Error('除以零'); stack.push(a / b); break;
-          case '%': if (b === 0) throw new Error('除以零'); stack.push(a % b); break;
-          case '^': stack.push(Math.pow(a, b)); break;
-        }
-      }
-    }
-  }
-  if (stack.length !== 1) throw new Error('表达式不完整');
-  return stack[0];
-}
-
-function evaluate(expr, x, angleMode) {
-  const s = String(expr).trim();
-  if (!s) throw new Error('表达式为空');
-  return evaluateRPN(toRPN(tokenize(s)), x, angleMode);
-}
-
-/* =========================================================
-   2. Tab 切换
-   ========================================================= */
-let angleMode = 'rad';
-
-document.querySelectorAll('.tabbar button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tabbar button').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('screen-' + btn.dataset.tab).classList.add('active');
-    if (btn.dataset.tab === 'graph') {
-      // 布局完成后重绘
-      requestAnimationFrame(() => setTimeout(drawGraph, 30));
-    }
-  });
-});
-
-/* =========================================================
-   3. 科学计算器
-   ========================================================= */
-const exprEl   = document.getElementById('expr');
-const resultEl = document.getElementById('result');
-const angleBtn = document.getElementById('angleToggle');
-
-let expr = '';
-
-function formatNumber(v) {
-  if (!isFinite(v)) return v > 0 ? '∞' : '-∞';
-  if (Number.isInteger(v) && Math.abs(v) < 1e15) return v.toString();
-  let s = v.toPrecision(12);
-  if (s.includes('e')) return parseFloat(s).toString();
-  if (s.includes('.')) s = s.replace(/0+$/, '').replace(/\.$/, '');
-  return s;
-}
-
-function renderCalc() {
-  exprEl.textContent = expr || '0';
-  if (!expr) {
-    resultEl.textContent = '';
-    resultEl.classList.remove('error');
-    return;
-  }
-  try {
-    const v = evaluate(expr, undefined, angleMode);
-    if (isFinite(v)) {
-      resultEl.textContent = '= ' + formatNumber(v);
-      resultEl.classList.remove('error');
-    } else {
-      resultEl.textContent = '';
-      resultEl.classList.remove('error');
-    }
-  } catch (e) {
-    resultEl.textContent = '';
-    resultEl.classList.remove('error');
-  }
-}
-
-document.querySelectorAll('.pad .key').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const ins = btn.dataset.ins;
-    const action = btn.dataset.action;
-
-    if (ins !== undefined) {
-      expr += ins;
-      renderCalc();
-    } else if (action === 'clear') {
-      expr = '';
-      renderCalc();
-    } else if (action === 'back') {
-      expr = expr.slice(0, -1);
-      renderCalc();
-    } else if (action === 'equals') {
-      try {
-        const v = evaluate(expr, undefined, angleMode);
-        if (!isFinite(v)) {
-          resultEl.textContent = '结果无效';
-          resultEl.classList.add('error');
-          return;
-        }
-        expr = formatNumber(v);
-        renderCalc();
-      } catch (e) {
-        resultEl.textContent = e.message || '错误';
-        resultEl.classList.add('error');
-      }
-    }
-  });
-});
-
-angleBtn.addEventListener('click', () => {
-  angleMode = angleMode === 'rad' ? 'deg' : 'rad';
-  angleBtn.textContent = angleMode === 'rad' ? 'RAD' : 'DEG';
-  renderCalc();
-  drawGraph();
-});
-
-renderCalc();
-
-/* =========================================================
-   4. 函数绘图
-   ========================================================= */
-const canvas   = document.getElementById('graphCanvas');
-const graphExpr = document.getElementById('graphExpr');
-const ctx = canvas.getContext('2d');
-
-const view = { xMin: -10, xMax: 10, yMin: -6, yMax: 6 };
-
-function niceStep(range, targetCount) {
-  const raw = range / targetCount;
-  const pow = Math.pow(10, Math.floor(Math.log10(raw)));
-  const n = raw / pow;
-  let step;
-  if (n < 1.5) step = 1;
-  else if (n < 3) step = 2;
-  else if (n < 7) step = 5;
-  else step = 10;
-  return step * pow;
-}
-
-function drawGraph() {
-  const rect = canvas.getBoundingClientRect();
-  if (rect.width === 0) return;
-  const dpr = window.devicePixelRatio || 1;
-  const W = rect.width, H = rect.height;
-
-  if (canvas.width !== Math.round(W * dpr) || canvas.height !== Math.round(H * dpr)) {
-    canvas.width  = Math.round(W * dpr);
-    canvas.height = Math.round(H * dpr);
-  }
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  // 背景
-  ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(0, 0, W, H);
-
-  const toPx = (x, y) => [
-    (x - view.xMin) / (view.xMax - view.xMin) * W,
-    H - (y - view.yMin) / (view.yMax - view.yMin) * H
-  ];
-
-  // 网格
-  const xStep = niceStep(view.xMax - view.xMin, 8);
-  const yStep = niceStep(view.yMax - view.yMin, 6);
-
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = '#F2F2F7';
-  ctx.beginPath();
-  for (let x = Math.ceil(view.xMin / xStep) * xStep; x <= view.xMax; x += xStep) {
-    const [px] = toPx(x, 0);
-    ctx.moveTo(px, 0); ctx.lineTo(px, H);
-  }
-  for (let y = Math.ceil(view.yMin / yStep) * yStep; y <= view.yMax; y += yStep) {
-    const [, py] = toPx(0, y);
-    ctx.moveTo(0, py); ctx.lineTo(W, py);
-  }
-  ctx.stroke();
-
-  // 坐标轴
-  ctx.strokeStyle = '#D1D1D6';
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  if (view.yMin <= 0 && view.yMax >= 0) {
-    const [, py] = toPx(0, 0);
-    ctx.moveTo(0, py); ctx.lineTo(W, py);
-  }
-  if (view.xMin <= 0 && view.xMax >= 0) {
-    const [px] = toPx(0, 0);
-    ctx.moveTo(px, 0); ctx.lineTo(px, H);
-  }
-  ctx.stroke();
-
-  // 刻度标签
-  ctx.fillStyle = '#C7C7CC';
-  ctx.font = '10px -apple-system, system-ui, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  for (let x = Math.ceil(view.xMin / xStep) * xStep; x <= view.xMax; x += xStep) {
-    if (Math.abs(x) < 1e-9) continue;
-    const [px, py] = toPx(x, 0);
-    if (py < 0 || py > H - 12) {
-      ctx.fillText(formatTick(x), px, Math.min(Math.max(py + 3, 2), H - 12));
-    } else {
-      ctx.fillText(formatTick(x), px, py + 3);
-    }
-  }
-  ctx.textAlign = 'right';
-  ctx.textBaseline = 'middle';
-  for (let y = Math.ceil(view.yMin / yStep) * yStep; y <= view.yMax; y += yStep) {
-    if (Math.abs(y) < 1e-9) continue;
-    const [px, py] = toPx(0, y);
-    ctx.fillText(formatTick(y), Math.min(Math.max(px - 4, 22), W - 2), py);
-  }
-
-  // 曲线
-  const src = graphExpr.value.trim();
-  if (!src) return;
-
-  const N = Math.max(Math.round(W * 2), 800);
-  ctx.strokeStyle = '#007AFF';
-  ctx.lineWidth = 2.5;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-
-  let started = false;
-  let prevPy = null;
-
-  for (let i = 0; i <= N; i++) {
-    const x = view.xMin + (view.xMax - view.xMin) * i / N;
-    let y;
-    try { y = evaluate(src, x, angleMode); }
-    catch (e) { started = false; prevPy = null; continue; }
-
-    if (!isFinite(y)) { started = false; prevPy = null; continue; }
-
-    const [px, py] = toPx(x, y);
-
-    if (!started) {
-      ctx.moveTo(px, py);
-      started = true;
-    } else {
-      // 检测不连续（如 tan 的渐近线）
-      if (prevPy !== null && Math.abs(py - prevPy) > H * 0.9) {
-        ctx.moveTo(px, py);
-      } else {
-        ctx.lineTo(px, py);
-      }
-    }
-    prevPy = py;
-  }
-  ctx.stroke();
-}
-
-function formatTick(v) {
-  if (Math.abs(v) >= 1000 || (Math.abs(v) < 0.01 && v !== 0)) return v.toExponential(1);
-  const s = parseFloat(v.toFixed(4)).toString();
-  return s;
-}
-
-/* --- 交互：拖动平移 + 双指缩放 --- */
-const pointers = new Map();
-let lastPinchDist = null;
-
-canvas.addEventListener('pointerdown', e => {
-  canvas.setPointerCapture(e.pointerId);
-  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-});
-
-canvas.addEventListener('pointermove', e => {
-  if (!pointers.has(e.pointerId)) return;
-  const prev = pointers.get(e.pointerId);
-  const cur = { x: e.clientX, y: e.clientY };
-  pointers.set(e.pointerId, cur);
-
-  const rect = canvas.getBoundingClientRect();
-
-  if (pointers.size === 1) {
-    const dx = (cur.x - prev.x) / rect.width  * (view.xMax - view.xMin);
-    const dy = (cur.y - prev.y) / rect.height * (view.yMax - view.yMin);
-    view.xMin -= dx; view.xMax -= dx;
-    view.yMin += dy; view.yMax += dy;
-    drawGraph();
-  } else if (pointers.size === 2) {
-    const pts = Array.from(pointers.values());
-    const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-    if (lastPinchDist !== null && dist > 0) {
-      const scale = lastPinchDist / dist;
-      const cx = (pts[0].x + pts[1].x) / 2 - rect.left;
-      const cy = (pts[0].y + pts[1].y) / 2 - rect.top;
-      const u = cx / rect.width;
-      const v = cy / rect.height;
-      const xc = view.xMin + u * (view.xMax - view.xMin);
-      const yc = view.yMax - v * (view.yMax - view.yMin);
-
-      view.xMin = xc + (view.xMin - xc) * scale;
-      view.xMax = xc + (view.xMax - xc) * scale;
-      view.yMin = yc + (view.yMin - yc) * scale;
-      view.yMax = yc + (view.yMax - yc) * scale;
-      drawGraph();
-    }
-    lastPinchDist = dist;
-  }
-});
-
-function endPointer(e) {
-  pointers.delete(e.pointerId);
-  if (pointers.size < 2) lastPinchDist = null;
-}
-canvas.addEventListener('pointerup', endPointer);
-canvas.addEventListener('pointercancel', endPointer);
-canvas.addEventListener('pointerleave', endPointer);
-
-/* --- 缩放按钮 --- */
-function zoomView(factor) {
-  const cx = (view.xMin + view.xMax) / 2;
-  const cy = (view.yMin + view.yMax) / 2;
-  view.xMin = cx + (view.xMin - cx) * factor;
-  view.xMax = cx + (view.xMax - cx) * factor;
-  view.yMin = cy + (view.yMin - cy) * factor;
-  view.yMax = cy + (view.yMax - cy) * factor;
-  drawGraph();
-}
-document.getElementById('zoomIn').addEventListener('click', () => zoomView(0.75));
-document.getElementById('zoomOut').addEventListener('click', () => zoomView(1.35));
-document.getElementById('resetView').addEventListener('click', () => {
-  view.xMin = -10; view.xMax = 10; view.yMin = -6; view.yMax = 6;
-  drawGraph();
-});
-
-/* --- 输入实时重绘（防抖） --- */
-let graphTimer = null;
-graphExpr.addEventListener('input', () => {
-  clearTimeout(graphTimer);
-  graphTimer = setTimeout(drawGraph, 120);
-});
-
-/* --- 窗口尺寸变化重绘 --- */
-window.addEventListener('resize', () => {
-  clearTimeout(graphTimer);
-  graphTimer = setTimeout(drawGraph, 100);
-});
-window.addEventListener('orientationchange', () => {
-  setTimeout(drawGraph, 250);
-});
-
-/* =========================================================
-   5. 进制转换
-   ========================================================= */
-function parseBigInt(str, base) {
-  if (!str) return null;
-  let s = String(str).trim().toLowerCase();
-  if (!s) return null;
-  // 去掉常见前缀
-  s = s.replace(/^0x/, '').replace(/^0o/, '').replace(/^0b/, '');
-  if (!s) return null;
-  let result = 0n;
-  const b = BigInt(base);
-  const digits = '0123456789abcdefghijklmnopqrstuvwxyz';
-  for (const ch of s) {
-    const d = digits.indexOf(ch);
-    if (d < 0 || d >= base) return null;
-    result = result * b + BigInt(d);
-  }
-  return result;
-}
-
-function toBaseStr(value, base) {
-  if (value === 0n) return '0';
-  let neg = false;
-  if (value < 0n) { neg = true; value = -value; }
-  const digits = '0123456789ABCDEF';
-  const b = BigInt(base);
-  let out = '';
-  let n = value;
-  while (n > 0n) {
-    out = digits[Number(n % b)] + out;
-    n = n / b;
-  }
-  return (neg ? '-' : '') + out;
-}
-
-const BASE_FIELDS = [
-  { id: 'in-dec', base: 10 },
-  { id: 'in-hex', base: 16 },
-  { id: 'in-oct', base: 8 },
-  { id: 'in-bin', base: 2 }
-];
-
-let syncing = false;
-
-BASE_FIELDS.forEach(({ id, base }) => {
-  const el = document.getElementById(id);
-  el.addEventListener('input', () => {
-    if (syncing) return;
-    syncing = true;
-    const v = parseBigInt(el.value, base);
-    if (v !== null) {
-      BASE_FIELDS.forEach(f => {
-        if (f.id === id) return;
-        document.getElementById(f.id).value = toBaseStr(v, f.base);
-      });
-    }
-    syncing = false;
-  });
-});
-
-/* =========================================================
-   6. 首次加载
-   ========================================================= */
-window.addEventListener('load', () => {
-  setTimeout(drawGraph, 200);
-});
-</script>
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./service-worker.js')
-        .catch(err => console.log('SW 注册失败：', err));
-    });
-  }
-</script>
+<script src="./app.js"></script>
 </body>
 </html>
